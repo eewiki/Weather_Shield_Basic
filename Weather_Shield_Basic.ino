@@ -28,14 +28,16 @@ const byte REFERENCE_3V3 = A3;
 const byte LIGHT = A1;
 const byte BATT = A2;
 
+int counter=10;
+
 //Global Variables
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 long lastSecond; //The millis counter to see when a second rolls by
 
 void setup()
 {
-  Serial.begin(9600);
-  Serial.println("Weather Shield Example");
+  Serial1.begin(57600);
+  Serial1.println("Weather Shield Example");
 
   pinMode(STAT_BLUE, OUTPUT); //Status LED Blue
   pinMode(STAT_GREEN, OUTPUT); //Status LED Green
@@ -54,24 +56,24 @@ void setup()
 
   lastSecond = millis();
 
-  Serial.println("Weather Shield online!");
+  Serial1.println("Weather Shield online!");
 }
 
 void loop()
 {
   //Print readings every second
-  if (millis() - lastSecond >= 1000)
+  if (millis() - lastSecond >= 10000)
   {
     digitalWrite(STAT_BLUE, HIGH); //Blink stat LED
 
-    lastSecond += 1000;
+    lastSecond += 10000;
 
     //Check Humidity Sensor
     float humidity = myHumidity.readHumidity();
 
     if (humidity == 998) //Humidty sensor failed to respond
     {
-      Serial.println("I2C communication to sensors is not working. Check solder connections.");
+      Serial1.println("I2C communication to sensors is not working. Check solder connections.");
 
       //Try re-initializing the I2C comm and the sensors
       myPressure.begin(); 
@@ -82,39 +84,63 @@ void loop()
     }
     else
     {
-      Serial.print("Humidity = ");
-      Serial.print(humidity);
-      Serial.print("%,");
-      float temp_h = myHumidity.readTemperature();
-      Serial.print(" temp_h = ");
-      Serial.print(temp_h, 2);
-      Serial.print("C,");
+	Serial1.print("$WBH:");
+	Serial1.print(counter);
+	Serial1.print(":Humid:");
+	Serial1.print(humidity);
+	Serial1.println("P*");
+
+//      Serial1.print("Humidity = ");
+//      Serial1.print(humidity);
+//      Serial1.print("%,");
+//      float temp_h = myHumidity.readTemperature();
+//      Serial1.print(" temp_h = ");
+//      Serial1.print(temp_h, 2);
+//      Serial1.print("C,");
 
       //Check Pressure Sensor
       float pressure = myPressure.readPressure();
-      Serial.print(" Pressure = ");
-      Serial.print(pressure);
-      Serial.print("Pa,");
+//      Serial1.print(" Pressure = ");
+//      Serial1.print(pressure);
+//      Serial1.print("Pa,");
+
+	Serial1.print("$WBP:");
+	Serial1.print(counter);
+	Serial1.print(":Pres:");
+	Serial1.print(pressure);
+	Serial1.println("Pa*");
 
       //Check tempf from pressure sensor
       float tempf = myPressure.readTempF();
-      Serial.print(" temp_p = ");
-      Serial.print(tempf, 2);
-      Serial.print("F,");
+//      Serial1.print(" temp_p = ");
+//      Serial1.print(tempf, 2);
+//      Serial1.print("F,");
 
-      //Check light sensor
-      float light_lvl = get_light_level();
-      Serial.print(" light_lvl = ");
-      Serial.print(light_lvl);
-      Serial.print("V,");
+	Serial1.print("$WBT:");
+	Serial1.print(counter);
+	Serial1.print(":TempF:");
+	Serial1.print(tempf, 2);
+	Serial1.println("F*");
+	Serial1.println("");
 
-      //Check batt level
-      float batt_lvl = get_battery_level();
-      Serial.print(" VinPin = ");
-      Serial.print(batt_lvl);
-      Serial.print("V");
+//      //Check light sensor
+//      float light_lvl = get_light_level();
+//      Serial1.print(" light_lvl = ");
+//      Serial1.print(light_lvl);
+//      Serial1.print("V,");
 
-      Serial.println();
+//      //Check batt level
+//      float batt_lvl = get_battery_level();
+//      Serial1.print(" VinPin = ");
+//      Serial1.print(batt_lvl);
+//      Serial1.print("V");
+
+//      Serial1.println();
+	counter++;
+	if (counter == 100)
+	{
+		counter = 10;
+	}
     }
 
     digitalWrite(STAT_BLUE, LOW); //Turn off stat LED
